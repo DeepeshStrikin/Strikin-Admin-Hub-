@@ -4,6 +4,8 @@ import { api } from '../api'
 const FIELDS = [
   ['venue_name', 'Venue name'],
   ['support_email', 'Support email'],
+  ['open_time', 'Opening time (e.g. 11:00 AM)'],
+  ['close_time', 'Closing time (e.g. 11:00 PM)'],
   ['gst_rate_percent', 'GST rate (%)'],
   ['gst_hsn_sac_code', 'GST HSN/SAC code'],
   ['loyalty_earn_rate', 'Loyalty earn rate (e.g. 0.05 = 5%)'],

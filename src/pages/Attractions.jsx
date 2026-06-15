@@ -49,6 +49,15 @@ export default function Attractions() {
       setTierDrawer(null); flash('Tier saved'); reload()
     } catch (e) { alert(e.message) }
   }
+
+  // Save tier settings AND set how many bays the tier has (auto create/remove).
+  async function saveTierPanel(d, bayCount, maxPlayers) {
+    try {
+      await api.saveTier({ ...d, activity_type_id: activeId, price: Number(d.price), time_interval_minutes: Number(d.time_interval_minutes) })
+      await api.setBayCount({ activity_type_id: activeId, key: d.key, count: Number(bayCount), price: Number(d.price), max_players: Number(maxPlayers) })
+      flash('Saved'); reload()
+    } catch (e) { alert(e.message) }
+  }
   async function deleteTier(key) {
     if (!confirm('Delete this tier and all its bays?')) return
     try { await api.deleteTier(activeId, key); flash('Tier deleted'); reload() } catch (e) { alert(e.message) }
@@ -103,7 +112,7 @@ export default function Attractions() {
                 <span className="muted" style={{ marginLeft: 8, fontWeight: 500 }}>· {rupees(t.price)} · {t.bays.length} {t.bays.length === 1 ? 'bay' : 'bays'}</span>
               </div>
               {openKey === t.key && (
-                <TierPanel tier={t} onSaveTier={saveTier} onDeleteTier={deleteTier}
+                <TierPanel tier={t} onSave={saveTierPanel} onDeleteTier={deleteTier}
                            onAddBay={() => setBayDrawer({ tier: t })} onOpenBay={(b) => setBayDetail({ bay: b, tier: t })} />
               )}
             </div>
@@ -123,15 +132,29 @@ export default function Attractions() {
   )
 }
 
-function TierPanel({ tier, onSaveTier, onDeleteTier, onAddBay, onOpenBay }) {
+function TierPanel({ tier, onSave, onDeleteTier, onAddBay, onOpenBay }) {
+  const defMax = tier.bays[0]?.max_players || ({ standard: 6, vip: 8, vvip: 20 }[tier.key] || 6)
   const [f, setF] = useState({ description: tier.description, price: tier.price, time_interval_minutes: tier.time_interval_minutes, allow_select: tier.allow_select })
-  useEffect(() => { setF({ description: tier.description, price: tier.price, time_interval_minutes: tier.time_interval_minutes, allow_select: tier.allow_select }) }, [tier.key]) // eslint-disable-line
+  const [bayCount, setBayCount] = useState(tier.bays.length)
+  const [maxPlayers, setMaxPlayers] = useState(defMax)
+  useEffect(() => {
+    setF({ description: tier.description, price: tier.price, time_interval_minutes: tier.time_interval_minutes, allow_select: tier.allow_select })
+    setBayCount(tier.bays.length)
+    setMaxPlayers(tier.bays[0]?.max_players || ({ standard: 6, vip: 8, vvip: 20 }[tier.key] || 6))
+  }, [tier.key]) // eslint-disable-line
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }))
   return (
     <div className="acc-body" style={{ paddingTop: 16 }}>
       <div className="field row">
         <div style={{ flex: 2 }}><label>Bay description</label><textarea rows="2" value={f.description} onChange={(e) => set('description', e.target.value)} /></div>
         <div style={{ flex: 1 }}><label>Tier price (₹)</label><input type="number" value={f.price} onChange={(e) => set('price', e.target.value)} /></div>
+      </div>
+      <div className="field row">
+        <div style={{ flex: 1 }}><label>Number of bays</label><input type="number" min="0" value={bayCount} onChange={(e) => setBayCount(e.target.value)} /></div>
+        <div style={{ flex: 1 }}><label>Max players per bay</label><input type="number" min="1" value={maxPlayers} onChange={(e) => setMaxPlayers(e.target.value)} /></div>
+      </div>
+      <div className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
+        Set the count and Save — bays are auto-created/removed to match (currently {tier.bays.length}).
       </div>
       <div className="section-title" style={{ margin: '6px 0 10px' }}>List of bays</div>
       <div className="bay-strip">
@@ -155,7 +178,7 @@ function TierPanel({ tier, onSaveTier, onDeleteTier, onAddBay, onOpenBay }) {
       </div>
       <div className="row-between" style={{ marginTop: 18 }}>
         <button className="btn sm danger" onClick={() => onDeleteTier(tier.key)}>Delete tier</button>
-        <button className="btn primary" onClick={() => onSaveTier({ key: tier.key, name: tier.name, ...f })}>Save tier</button>
+        <button className="btn primary" onClick={() => onSave({ key: tier.key, name: tier.name, ...f }, bayCount, maxPlayers)}>Save tier</button>
       </div>
     </div>
   )

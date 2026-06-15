@@ -70,6 +70,7 @@ export const api = {
 
   tiers: (activityId) => req('GET', `/activities/${activityId}/tiers`),
   saveTier: (d) => req('POST', '/admin/tiers', d),
+  setBayCount: (d) => req('POST', '/admin/tiers/bay-count', d),
   deleteTier: (activityId, key) =>
     req('DELETE', `/admin/tiers?activity_type_id=${encodeURIComponent(activityId)}&key=${encodeURIComponent(key)}`),
 
