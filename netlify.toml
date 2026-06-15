@@ -1,0 +1,12 @@
+# Netlify build config for the Strikin control panel (Vite + React).
+# Set VITE_API_URL in Netlify → Site settings → Environment variables
+# to your Railway backend URL, e.g. https://web-production-c154d.up.railway.app
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Single-page-app routing: serve index.html for any path so /attractions etc. work on refresh.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
