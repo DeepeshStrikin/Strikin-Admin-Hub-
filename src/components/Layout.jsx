@@ -51,8 +51,8 @@ export default function Layout() {
             <input placeholder="Search" />
           </div>
           <div className="me">
-            <div className="avatar">A</div>
-            <div className="who"><b>Arun</b><small>Super admin</small></div>
+            <div className="avatar">S</div>
+            <div className="who"><b>Admin</b><small>Strikin</small></div>
             <button className="btn sm" onClick={() => { logout(); nav('/login') }}>Logout</button>
           </div>
         </header>
