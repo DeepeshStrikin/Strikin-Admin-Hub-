@@ -41,6 +41,7 @@ export const api = {
 
   uploadImage,
   bookings: () => req('GET', '/admin/bookings'),
+  addBooking: (d) => req('POST', '/admin/bookings/create', d),
   revenue: () => req('GET', '/admin/revenue'),
   stats: () => req('GET', '/admin/stats'),
 
