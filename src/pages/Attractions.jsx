@@ -100,7 +100,7 @@ export default function Attractions() {
             <div key={t.key} className="acc-item">
               <div className={'acc-head' + (openKey === t.key ? ' open' : '')} onClick={() => setOpenKey(openKey === t.key ? null : t.key)}>
                 <Chev />{t.name}
-                <span className="muted" style={{ marginLeft: 8, fontWeight: 500 }}>· {rupees(t.price)} · {t.bays.length} bays</span>
+                <span className="muted" style={{ marginLeft: 8, fontWeight: 500 }}>· {rupees(t.price)} · {t.bays.length} {t.bays.length === 1 ? 'bay' : 'bays'}</span>
               </div>
               {openKey === t.key && (
                 <TierPanel tier={t} onSaveTier={saveTier} onDeleteTier={deleteTier}
