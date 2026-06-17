@@ -172,8 +172,9 @@ function TierPanel({ tier, onSave, onDeleteTier, onAddBay, onOpenBay }) {
             {INTERVALS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </div>
-        <div style={{ flex: 1 }}><label>Allow customer to select bay</label>
+        <div style={{ flex: 1 }}><label>Customer picks the specific bay</label>
           <div><label className="switch"><input type="checkbox" checked={f.allow_select} onChange={(e) => set('allow_select', e.target.checked)} /><span /></label></div>
+          <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>On: themed rooms (VVIP) — customer chooses which. Off: identical bays — customer just picks how many.</div>
         </div>
       </div>
       <div className="row-between" style={{ marginTop: 18 }}>

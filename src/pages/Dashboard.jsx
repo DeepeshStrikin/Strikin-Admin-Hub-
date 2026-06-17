@@ -8,7 +8,7 @@ export default function Dashboard() {
   useEffect(() => { api.stats().then(setS).catch(() => setS(null)) }, [])
 
   const cards = s ? [
-    ['Total revenue', rupees(s.total_revenue)],
+    ['Collected revenue', rupees(s.total_revenue)],
     ['Total bookings', s.total_bookings],
     ['Paid bookings', s.paid_bookings],
     ['Pending payment', s.pending_bookings],

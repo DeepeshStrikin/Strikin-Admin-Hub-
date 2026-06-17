@@ -16,10 +16,10 @@ export default function Revenue() {
       <h1 className="page">Revenue</h1>
 
       <div className="page-card" style={{ marginBottom: 20 }}>
-        <b>Attraction wise revenue</b>
+        <b>Attraction wise revenue</b> <span className="muted" style={{ fontSize: 12 }}>(paid only)</span>
         <div style={{ fontSize: 28, fontWeight: 800, margin: '10px 0 16px' }}>
-          {rupees(d.total)}
-          <span className="muted" style={{ fontSize: 14, fontWeight: 500 }}> · {rupees(d.paid)} collected</span>
+          {rupees(d.total)} <span className="muted" style={{ fontSize: 14, fontWeight: 500 }}>collected</span>
+          {d.pending > 0 && <span className="muted" style={{ fontSize: 14, fontWeight: 500 }}> · {rupees(d.pending)} pending</span>}
         </div>
         <div className="table-wrap">
           <table>
