@@ -16,11 +16,27 @@ export default function Bookings() {
   useEffect(() => { load() }, [])
   const flash = (m) => { setToast(m); setTimeout(() => setToast(''), 2200) }
 
+  const del = async (b) => {
+    if (!confirm(`Delete booking ${b.id}? This cannot be undone.`)) return
+    try { await api.deleteBooking(b.id); flash('Booking deleted'); load() }
+    catch (e) { flash(e.message) }
+  }
+  const clearFailed = async () => {
+    if (!confirm('Delete ALL failed & cancelled bookings? This clears test data and cannot be undone.')) return
+    try { const r = await api.clearFailedBookings(); flash(`Deleted ${r.deleted} booking(s)`); load() }
+    catch (e) { flash(e.message) }
+  }
+
   return (
     <div>
       <div className="row-between">
         <h1 className="page" style={{ margin: 0 }}>Bookings</h1>
-        {tab === 'bookings' && <button className="btn primary" onClick={() => setDrawer(true)}>+ Add booking</button>}
+        {tab === 'bookings' && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn" onClick={clearFailed}>Clear failed</button>
+            <button className="btn primary" onClick={() => setDrawer(true)}>+ Add booking</button>
+          </div>
+        )}
       </div>
       <div className="tabs" style={{ marginTop: 12 }}>
         <button className={tab === 'bookings' ? 'active' : ''} onClick={() => setTab('bookings')}>All bookings</button>
@@ -33,7 +49,7 @@ export default function Bookings() {
           <div className="table-wrap">
             <table>
               <thead><tr>
-                <th>Booking</th><th>Customer</th><th>Activity</th><th>Bay</th><th>When</th><th>Players</th><th>Amount</th><th>Payment</th>
+                <th>Booking</th><th>Customer</th><th>Activity</th><th>Bay</th><th>When</th><th>Players</th><th>Amount</th><th>Payment</th><th></th>
               </tr></thead>
               <tbody>
                 {rows.map((b) => (
@@ -46,9 +62,10 @@ export default function Bookings() {
                     <td>{b.players}</td>
                     <td>{rupees(b.amount)}</td>
                     <td><Pill s={b.payment_status} /></td>
+                    <td><button className="btn-link-danger" onClick={() => del(b)} title="Delete booking">Delete</button></td>
                   </tr>
                 ))}
-                {rows.length === 0 && <tr><td colSpan="8" className="empty">No bookings yet.</td></tr>}
+                {rows.length === 0 && <tr><td colSpan="9" className="empty">No bookings yet.</td></tr>}
               </tbody>
             </table>
           </div>

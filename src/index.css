@@ -69,6 +69,9 @@ h1.page { font-size: 26px; margin: 0 0 20px; }
 .btn.primary:hover { filter: brightness(.96); }
 .btn.danger { color: var(--red); border-color: #f3c9ca; background: #fff; }
 .btn.sm { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
+.btn-link-danger { background: none; border: none; color: var(--red); font-weight: 600;
+  font-size: 13px; cursor: pointer; padding: 4px 6px; }
+.btn-link-danger:hover { text-decoration: underline; }
 
 /* Tables */
 table { width: 100%; border-collapse: collapse; }
