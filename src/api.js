@@ -42,6 +42,7 @@ export const api = {
   uploadImage,
   bookings: () => req('GET', '/admin/bookings'),
   addBooking: (d) => req('POST', '/admin/bookings/create', d),
+  availability: (activityId, date) => req('GET', `/admin/availability?activity_id=${encodeURIComponent(activityId)}&date=${encodeURIComponent(date)}`),
   revenue: () => req('GET', '/admin/revenue'),
   stats: () => req('GET', '/admin/stats'),
 

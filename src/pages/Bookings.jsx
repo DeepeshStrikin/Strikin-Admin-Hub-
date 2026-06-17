@@ -11,6 +11,7 @@ export default function Bookings() {
   const [rows, setRows] = useState(null)
   const [drawer, setDrawer] = useState(false)
   const [toast, setToast] = useState('')
+  const [tab, setTab] = useState('bookings')
   const load = () => api.bookings().then(setRows).catch(() => setRows([]))
   useEffect(() => { load() }, [])
   const flash = (m) => { setToast(m); setTimeout(() => setToast(''), 2200) }
@@ -19,9 +20,15 @@ export default function Bookings() {
     <div>
       <div className="row-between">
         <h1 className="page" style={{ margin: 0 }}>Bookings</h1>
-        <button className="btn primary" onClick={() => setDrawer(true)}>+ Add booking</button>
+        {tab === 'bookings' && <button className="btn primary" onClick={() => setDrawer(true)}>+ Add booking</button>}
       </div>
-      <div className="page-card" style={{ marginTop: 18 }}>
+      <div className="tabs" style={{ marginTop: 12 }}>
+        <button className={tab === 'bookings' ? 'active' : ''} onClick={() => setTab('bookings')}>All bookings</button>
+        <button className={tab === 'availability' ? 'active' : ''} onClick={() => setTab('availability')}>Availability</button>
+      </div>
+
+      {tab === 'availability' ? <Availability /> : (
+      <div className="page-card">
         {!rows ? <div className="empty">Loading…</div> : (
           <div className="table-wrap">
             <table>
@@ -47,8 +54,66 @@ export default function Bookings() {
           </div>
         )}
       </div>
+      )}
       {drawer && <AddBookingDrawer onClose={() => setDrawer(false)} onDone={() => { setDrawer(false); flash('Booking created'); load() }} />}
       {toast && <div className="toast">{toast}</div>}
+    </div>
+  )
+}
+
+function Availability() {
+  const [activities, setActivities] = useState([])
+  const [activityId, setActivityId] = useState('')
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => { api.activities().then((a) => { setActivities(a); if (a[0]) setActivityId(a[0].id) }) }, [])
+  useEffect(() => {
+    if (!activityId) return
+    setLoading(true)
+    api.availability(activityId, date).then(setData).catch(() => setData(null)).finally(() => setLoading(false))
+  }, [activityId, date])
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <select value={activityId} onChange={(e) => setActivityId(e.target.value)}
+                style={{ padding: '9px 12px', borderRadius: 10, border: '1px solid var(--border)' }}>
+          {activities.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+        </select>
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+               style={{ padding: '9px 12px', borderRadius: 10, border: '1px solid var(--border)' }} />
+      </div>
+      <div className="page-card">
+        {loading || !data ? <div className="empty">Loading…</div> : (
+          <div style={{ overflowX: 'auto' }}>
+            <div className="muted" style={{ marginBottom: 12, fontSize: 13 }}>
+              {data.activity} · {data.date} — <span style={{ color: 'var(--green)' }}>green = free</span>,{' '}
+              <span style={{ color: 'var(--red)' }}>red = booked</span>
+            </div>
+            {data.bays.map((b) => (
+              <div key={b.bay} style={{ marginBottom: 14 }}>
+                <div className="row-between" style={{ marginBottom: 6 }}>
+                  <b>{b.bay} <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>({b.tier.toUpperCase()})</span></b>
+                  <span className="muted" style={{ fontSize: 12 }}>{b.free} free · {b.booked} booked</span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {b.slots.map((s) => (
+                    <span key={s.time} style={{
+                      fontSize: 12, padding: '4px 9px', borderRadius: 6,
+                      background: s.booked ? '#fbe9ea' : '#e9f6ee',
+                      color: s.booked ? 'var(--red)' : 'var(--green)',
+                      textDecoration: s.booked ? 'line-through' : 'none',
+                    }}>{s.time}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {data.bays.length === 0 && <div className="empty">No bays for this activity.</div>}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
