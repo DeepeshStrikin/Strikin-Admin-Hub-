@@ -28,6 +28,11 @@ export default function Bookings() {
     catch (e) { flash(e.message) }
   }
 
+  // Only show bookings that actually happened — hide failed/cancelled payment attempts.
+  const visibleRows = (rows || []).filter(
+    (b) => b.payment_status !== 'failed' && b.status !== 'failed' && b.status !== 'cancelled',
+  )
+
   return (
     <div>
       <div className="row-between">
@@ -53,7 +58,7 @@ export default function Bookings() {
                 <th>Booking</th><th>Customer</th><th>Activity</th><th>Bay</th><th>When</th><th>Players</th><th>Amount</th><th>Payment</th><th></th>
               </tr></thead>
               <tbody>
-                {rows.map((b) => (
+                {visibleRows.map((b) => (
                   <tr key={b.id} onClick={() => setDetailId(b.id)} style={{ cursor: 'pointer' }} title="View booking details">
                     <td><b>{b.id}</b></td>
                     <td>{b.guest_name || '—'}<div className="muted" style={{ fontSize: 12 }}>{b.guest_phone}</div></td>
@@ -66,7 +71,7 @@ export default function Bookings() {
                     <td><button className="btn-link-danger" onClick={(e) => { e.stopPropagation(); del(b) }} title="Delete booking">Delete</button></td>
                   </tr>
                 ))}
-                {rows.length === 0 && <tr><td colSpan="9" className="empty">No bookings yet.</td></tr>}
+                {visibleRows.length === 0 && <tr><td colSpan="9" className="empty">No bookings yet.</td></tr>}
               </tbody>
             </table>
           </div>
