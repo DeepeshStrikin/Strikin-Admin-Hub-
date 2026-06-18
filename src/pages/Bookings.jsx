@@ -10,6 +10,7 @@ const blank = { activity_id: '', bay_id: '', date: today(), time: '11:00 AM', pl
 export default function Bookings() {
   const [rows, setRows] = useState(null)
   const [drawer, setDrawer] = useState(false)
+  const [detailId, setDetailId] = useState(null)
   const [toast, setToast] = useState('')
   const [tab, setTab] = useState('bookings')
   const load = () => api.bookings().then(setRows).catch(() => setRows([]))
@@ -53,7 +54,7 @@ export default function Bookings() {
               </tr></thead>
               <tbody>
                 {rows.map((b) => (
-                  <tr key={b.id}>
+                  <tr key={b.id} onClick={() => setDetailId(b.id)} style={{ cursor: 'pointer' }} title="View booking details">
                     <td><b>{b.id}</b></td>
                     <td>{b.guest_name || '—'}<div className="muted" style={{ fontSize: 12 }}>{b.guest_phone}</div></td>
                     <td>{b.activity}</td>
@@ -62,7 +63,7 @@ export default function Bookings() {
                     <td>{b.players}</td>
                     <td>{rupees(b.amount)}</td>
                     <td><Pill s={b.payment_status} /></td>
-                    <td><button className="btn-link-danger" onClick={() => del(b)} title="Delete booking">Delete</button></td>
+                    <td><button className="btn-link-danger" onClick={(e) => { e.stopPropagation(); del(b) }} title="Delete booking">Delete</button></td>
                   </tr>
                 ))}
                 {rows.length === 0 && <tr><td colSpan="9" className="empty">No bookings yet.</td></tr>}
@@ -73,7 +74,68 @@ export default function Bookings() {
       </div>
       )}
       {drawer && <AddBookingDrawer onClose={() => setDrawer(false)} onDone={() => { setDrawer(false); flash('Booking created'); load() }} />}
+      {detailId && <BookingDetailDrawer id={detailId} onClose={() => setDetailId(null)} />}
       {toast && <div className="toast">{toast}</div>}
+    </div>
+  )
+}
+
+function BookingDetailDrawer({ id, onClose }) {
+  const [d, setD] = useState(null)
+  const [err, setErr] = useState('')
+  useEffect(() => { api.bookingDetails(id).then(setD).catch((e) => setErr(e.message)) }, [id])
+
+  const hostTotal = (d?.host_food || []).reduce((s, f) => s + Number(f.total || 0), 0)
+  const guestTotal = (d?.guest_food || []).reduce((s, f) => s + Number(f.total || 0), 0)
+
+  return (
+    <div className="drawer-overlay" onClick={onClose}>
+      <div className="drawer" onClick={(e) => e.stopPropagation()}>
+        <h2>Booking details<button type="button" className="x" onClick={onClose}>×</button></h2>
+        {err && <div className="empty">{err}</div>}
+        {!d && !err && <div className="empty">Loading…</div>}
+        {d && (
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            <div className="field"><label>Booking ID</label><div><b>{d.id}</b></div></div>
+            <div className="field row">
+              <div style={{ flex: 1 }}><label>Activity</label><div>{d.activity || '—'}</div></div>
+              <div style={{ flex: 1 }}><label>Bay</label><div>{d.bay || '—'}</div></div>
+            </div>
+            <div className="field row">
+              <div style={{ flex: 1 }}><label>When</label><div>{d.date} · {d.time}</div></div>
+              <div style={{ flex: 1 }}><label>Players</label><div>{d.players}</div></div>
+            </div>
+            <div className="field row">
+              <div style={{ flex: 1 }}><label>Status</label><div>{d.status}</div></div>
+              <div style={{ flex: 1 }}><label>Payment</label><div><Pill s={d.payment_status} /></div></div>
+            </div>
+            <div className="field"><label>Total amount</label><div><b>{rupees(d.amount)}</b></div></div>
+
+            <h3 style={{ margin: '18px 0 8px' }}>Food ordered (host)</h3>
+            {(d.host_food || []).length === 0 ? <div className="muted">No food ordered by host.</div> : (
+              <table style={{ width: '100%' }}><tbody>
+                {d.host_food.map((f, i) => (
+                  <tr key={i}><td>{f.quantity} × {f.name}</td><td style={{ textAlign: 'right' }}>{rupees(f.total)}</td></tr>
+                ))}
+                <tr><td><b>Subtotal</b></td><td style={{ textAlign: 'right' }}><b>{rupees(hostTotal)}</b></td></tr>
+              </tbody></table>
+            )}
+
+            <h3 style={{ margin: '18px 0 8px' }}>Guests' food (paid by guests)</h3>
+            {(d.guest_food || []).length === 0 ? <div className="muted">No guests have added food.</div> : (
+              <table style={{ width: '100%' }}><tbody>
+                {d.guest_food.map((f, i) => (
+                  <tr key={i}>
+                    <td>{f.guest}: {f.quantity} × {f.name}</td>
+                    <td style={{ textAlign: 'right' }}>{rupees(f.total)}</td>
+                  </tr>
+                ))}
+                <tr><td><b>Subtotal</b></td><td style={{ textAlign: 'right' }}><b>{rupees(guestTotal)}</b></td></tr>
+              </tbody></table>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

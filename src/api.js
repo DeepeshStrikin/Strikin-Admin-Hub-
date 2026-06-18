@@ -41,6 +41,7 @@ export const api = {
 
   uploadImage,
   bookings: () => req('GET', '/admin/bookings'),
+  bookingDetails: (id) => req('GET', `/bookings/${id}/details`),
   addBooking: (d) => req('POST', '/admin/bookings/create', d),
   deleteBooking: (id) => req('DELETE', `/admin/bookings/${id}`),
   clearFailedBookings: () => req('DELETE', '/admin/bookings/clear-failed'),
