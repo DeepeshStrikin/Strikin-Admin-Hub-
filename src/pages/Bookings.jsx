@@ -28,10 +28,8 @@ export default function Bookings() {
     catch (e) { flash(e.message) }
   }
 
-  // Only show bookings that actually happened — hide failed/cancelled payment attempts.
-  const visibleRows = (rows || []).filter(
-    (b) => b.payment_status !== 'failed' && b.status !== 'failed' && b.status !== 'cancelled',
-  )
+  // Show every booking (incl. failed) in the list — the Dashboard counts only successful ones.
+  const visibleRows = rows || []
 
   return (
     <div>

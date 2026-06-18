@@ -9,7 +9,8 @@ export default function Dashboard() {
 
   const cards = s ? [
     ['Collected revenue', rupees(s.total_revenue)],
-    ['Total bookings', s.total_bookings],
+    ['Total bookings (successful)', s.total_bookings],
+    ['Failed bookings', s.failed_bookings ?? 0],
     ['Paid bookings', s.paid_bookings],
     ['Pending payment', s.pending_bookings],
     ['Activities', s.activities],
