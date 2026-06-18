@@ -1,6 +1,8 @@
 // Admin API client. Points at the backend; in production set VITE_API_URL to the
 // Railway URL (e.g. https://strikin-api.up.railway.app).
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Defaults to the live Railway backend so the deployed admin works with no config.
+// For local dev against a local backend, set VITE_API_URL in .env.local.
+const BASE = import.meta.env.VITE_API_URL || 'https://web-production-c154d.up.railway.app'
 export const apiBase = BASE
 
 const token = () => localStorage.getItem('strikin_admin_token') || ''
